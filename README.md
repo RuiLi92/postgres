@@ -1,21 +1,46 @@
-PostgreSQL Database Management System
-=====================================
+# Prerequisites
+Run
+```bash
+sudo apt-get update
 
-This directory contains the source code distribution of the PostgreSQL
-database management system.
+sudo apt-get install -y \
+    build-essential \
+    libreadline-dev \
+    zlib1g-dev \
+    flex \
+    bison \
+    libssl-dev \
+    libxml2-dev \
+    libxslt-dev \
+    libpam0g-dev \
+    libedit-dev \
+    llvm-15 \
+    llvm-15-dev \
+    clang-15
 
-PostgreSQL is an advanced object-relational database management system
-that supports an extended subset of the SQL standard, including
-transactions, foreign keys, subqueries, triggers, user-defined types
-and functions.  This distribution also contains C language bindings.
+sudo apt-get install pkg-config
+sudo apt-get install libicu-dev
+```
+# Compile
+- Get path of llvm-config tool: `which llvm-config-15`. Suppose the output is `/usr/bin/llvm-config-15`
+- Install PostgreSQL in custom directory: 
+```bash
+git clone https://github.com/postgres/postgres.git
+cd postgres
+CLANG=/usr/bin/clang-15 LLVM_CONFIG=/usr/bin/llvm-config-15 ./configure --with-llvm
+make -j$(nproc)
+sudo make install
 
-Copyright and license information can be found in the file COPYRIGHT.
+```
 
-General documentation about this version of PostgreSQL can be found at
-<https://www.postgresql.org/docs/17/>.  In particular, information
-about building PostgreSQL from the source code can be found at
-<https://www.postgresql.org/docs/17/installation.html>.
-
-The latest version of this software, and related software, may be
-obtained at <https://www.postgresql.org/download/>.  For more information
-look at our web site located at <https://www.postgresql.org/>.
+# Run with JIT
+Modify `/usr/local/pgsql/data/postgresql.conf` and make sure `jit = on`.
+Then run `pg_ctl -D data -l logfile start` to start the PostgreSQL server.
+To verify the JIT, first run `psql` to enter into the DB session, then run `SHOW jit;`.
+The expected output is:
+```bash
+ jit
+-----
+ on
+(1 row)
+```
